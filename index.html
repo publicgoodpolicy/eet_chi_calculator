@@ -90,7 +90,7 @@ button,input{font:inherit;color:inherit}
 .result h2{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--ipg-muted)}
 .amount{font-size:34px;font-weight:700;color:var(--ipg-navy);letter-spacing:-.02em;margin:4px 0 0;font-variant-numeric:tabular-nums}
 .amount small{font-size:13px;font-weight:400;color:var(--ipg-muted);letter-spacing:0}
-.annual{font-family:var(--mono);font-size:12px;color:var(--ipg-muted)}
+.annual{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ipg-navy)}
 .verdict{display:inline-block;margin-top:10px;padding:3px 9px;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:500}
 .verdict.zero{background:var(--ipg-teal-light);color:var(--ipg-teal-dark)}
 .verdict.due{background:var(--ipg-navy);color:#fff}
@@ -100,6 +100,9 @@ button,input{font:inherit;color:inherit}
 .math li:last-child{border-bottom:0}
 .math li span:last-child{font-family:var(--mono);font-weight:500;text-align:right}
 .math li.fail span:last-child{color:var(--ipg-teal)}
+.funds{margin:4px 0 0;font-size:12px;color:var(--ipg-text);line-height:1.5}
+.funds a{color:var(--ipg-teal);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.funds a:hover{color:var(--ipg-teal-dark)}
 .note{font-size:11.5px;color:var(--ipg-muted);margin-top:14px}
 .footnote{font-size:11px;color:var(--ipg-muted);margin-top:8px}
 .status-bar{padding:6px 18px;background:var(--ipg-gray);border-top:1px solid var(--ipg-border);font-size:10px;color:var(--ipg-muted);font-family:var(--mono)}
@@ -173,7 +176,7 @@ button,input{font:inherit;color:inherit}
     <section class="result" aria-live="polite">
       <h2>Estimated tax</h2>
       <div class="amount" id="amount">$0<small> / month</small></div>
-      <div class="annual" id="annual">$0 per year</div>
+      <p class="funds"><span class="annual" id="annual">$0 per year</span> to help fund city programs and services like youth jobs, small business funding, public safety, and mental health. The full 2027 proposed city budget can be found <a href="https://www.chicago.gov/city/en/depts/obm/provdrs/budget/svcs/BudgetPublications.html#docaccess-15a5cc20c0c980f730515ab8d09ecf92" target="_blank" rel="noopener">here</a>.</p>
       <div class="verdict pending" id="verdict">Enter your details</div>
       <ul class="math" id="math"></ul>
       <p class="note" id="note"></p>
