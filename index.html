@@ -7,106 +7,115 @@
 <meta name="description" content="Check whether a Chicago business is in a Socioeconomically Disadvantaged Area and estimate its Equitable Employment Tax.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 /* ============================================================
-   Colours and type
+   IPG civic-tools brand (matches Find Your Representatives)
    ============================================================ */
 :root{
-  --bg:#f6f4ef; --panel:#ffffff; --ink:#1c1f24; --muted:#5d636d; --line:#e2ded5;
-  --accent:#1d4e89; --accent-ink:#ffffff;
-  --seda:#d9822b; --seda-fill:rgba(217,130,43,.32);
-  --ward:#2b2f36;
-  --good:#1f7a4d; --good-bg:#e7f4ec;
+  --ipg-navy:#0d2340; --ipg-teal:#00a89c; --ipg-teal-dark:#008c82; --ipg-teal-light:#e6f7f6;
+  --ipg-gray:#f4f6f8; --ipg-border:#d0d8e4; --ipg-text:#1a2b3c; --ipg-muted:#6b7f93;
   --warn:#9a5b00; --warn-bg:#fdf1de;
-  --due:#1d4e89;  --due-bg:#e6eef8;
-  --radius:12px;
+  --radius:8px; --shadow:0 2px 12px rgba(13,35,64,0.10);
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:15px;line-height:1.45}
-h1,h2,h3{margin:0;line-height:1.2}
+body{font-family:'Sora',system-ui,sans-serif;color:var(--ipg-text);background:var(--ipg-gray);font-size:13px;line-height:1.5}
+h1,h2,h3{margin:0;line-height:1.25}
 button,input{font:inherit;color:inherit}
 
-/* ============================================================
-   Layout: form panel left, map right; stacked on phones
-   ============================================================ */
-.app{display:grid;grid-template-columns:minmax(340px,430px) 1fr;height:100vh}
-.panel{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column}
+/* ---------- Layout: header bar, then form panel + map ---------- */
+.app-wrapper{display:flex;flex-direction:column;height:100vh}
+.header{background:var(--ipg-navy);padding:12px 20px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--ipg-teal);flex-shrink:0}
+.header-logo{width:32px;height:32px;background:var(--ipg-teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:500;color:#fff;font-size:11px;flex-shrink:0}
+.header-title{color:#fff;font-size:15px;font-weight:600}
+.header-sub{color:rgba(255,255,255,.5);font-size:11px;font-weight:300;margin-top:1px}
+.app{display:grid;grid-template-columns:minmax(320px,400px) 1fr;flex:1;min-height:0}
+.panel{background:#fff;border-right:1px solid var(--ipg-border);overflow-y:auto;display:flex;flex-direction:column}
 .map-wrap{position:relative;min-height:320px}
-#map{position:absolute;inset:0;background:#e8e6e1}
+#map{position:absolute;inset:0;background:#e9edf2}
 @media (max-width:820px){
-  .app{grid-template-columns:1fr;height:auto}
-  .map-wrap{height:62vh;order:-1}
-  .panel{border-right:0;border-top:1px solid var(--line)}
+  .app-wrapper{height:auto}
+  .app{grid-template-columns:1fr}
+  .map-wrap{height:60vh;order:-1}
+  .panel{border-right:0;border-top:1px solid var(--ipg-border)}
 }
 
-header.top{padding:22px 24px 18px;border-bottom:1px solid var(--line)}
-.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
-header.top h1{font-size:22px;font-weight:800;margin-top:4px}
-header.top p{margin:8px 0 0;color:var(--muted);font-size:14px}
+.intro{padding:16px 18px;border-bottom:1px solid var(--ipg-border);background:var(--ipg-teal-light)}
+.intro p{margin:0;font-size:12.5px;color:var(--ipg-text)}
+.intro p+p{margin-top:8px;color:var(--ipg-muted)}
 
-.step{padding:20px 24px;border-bottom:1px solid var(--line)}
-.step-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.num{flex:none;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center}
-.step h2{font-size:16px;font-weight:700}
-.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.step{padding:16px 18px;border-bottom:1px solid var(--ipg-border)}
+.step-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.num{flex:none;width:20px;height:20px;border-radius:50%;background:var(--ipg-teal);color:#fff;font-family:var(--mono);font-size:11px;font-weight:500;display:grid;place-items:center}
+.step h2{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--ipg-muted)}
+.hint{font-size:11.5px;color:var(--ipg-muted);margin:6px 0 0}
+.sub{display:block;font-size:12.5px;font-weight:600;margin:0 0 6px;color:var(--ipg-text)}
+.sub em{font-weight:400;color:var(--ipg-muted);font-style:normal}
 
-/* Inputs */
-.row{display:flex;gap:8px}
-.field{flex:1;min-width:0;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:15px}
-.field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(29,78,137,.15)}
-.btn{flex:none;padding:11px 16px;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;cursor:pointer}
-.btn:hover{filter:brightness(1.08)}
+/* ---------- Inputs ---------- */
+.row{display:flex;gap:7px}
+.field{flex:1;min-width:0;padding:9px 12px;border:1.5px solid var(--ipg-border);border-radius:var(--radius);background:#fff;font-size:13px;color:var(--ipg-text);outline:none;transition:border-color .2s}
+.field:focus{border-color:var(--ipg-teal)}
+.btn{flex:none;padding:9px 13px;border:0;border-radius:var(--radius);background:var(--ipg-teal);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s}
+.btn:hover{background:var(--ipg-teal-dark)}
 .btn:disabled{opacity:.55;cursor:default}
 
-/* Location result chip */
-.loc{margin-top:12px;border-radius:10px;padding:12px 14px;font-size:14px;display:none}
+/* ---------- Location result ---------- */
+.loc{margin-top:10px;border-radius:var(--radius);padding:10px 12px;font-size:12px;display:none}
 .loc.show{display:block}
-.loc strong{display:block;font-size:15px;margin-bottom:2px}
-.loc.in{background:var(--good-bg);color:var(--good)}
-.loc.out{background:var(--due-bg);color:var(--due)}
-.loc.err{background:var(--warn-bg);color:var(--warn)}
-.loc .addr{color:var(--ink);opacity:.8;font-size:13px;margin-top:4px}
+.loc strong{display:block;font-size:13px;font-weight:600;margin-bottom:2px}
+.loc.in{background:var(--ipg-teal-light);color:var(--ipg-teal-dark)}
+.loc.out{background:var(--ipg-gray);color:var(--ipg-navy);border:1px solid var(--ipg-border)}
+.loc.err{background:#fee2e2;color:#c0392b}
+.loc .addr{color:var(--ipg-muted);font-size:11px;margin-top:3px}
 
-/* Checkboxes */
+/* ---------- Exemptions ---------- */
 .checks{display:flex;flex-direction:column;gap:8px}
-.check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer}
-.check:hover{border-color:#cfc9bc}
-.check input{margin:2px 0 0;width:17px;height:17px;accent-color:var(--accent);flex:none}
-.check b{font-weight:600;display:block}
-.check span{font-size:13px;color:var(--muted)}
-.check:has(input:checked){border-color:var(--accent);background:#f3f7fc}
+.check{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1.5px solid var(--ipg-border);border-radius:var(--radius);cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.check:hover{border-color:var(--ipg-teal);box-shadow:var(--shadow)}
+.check input{margin:2px 0 0;width:15px;height:15px;accent-color:var(--ipg-teal);flex:none}
+.check b{font-weight:600;display:block;font-size:12.5px}
+.check span{font-size:11.5px;color:var(--ipg-muted)}
+.check:has(input:checked){border-color:var(--ipg-teal);background:var(--ipg-teal-light)}
+.excl{margin:6px 0 12px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.excl li{font-size:11.5px;padding:8px 11px;background:var(--ipg-gray);border-radius:6px}
+.excl b{display:block;font-size:12px;font-weight:600}
+.excl span{color:var(--ipg-muted)}
 
-/* Result */
-.result{padding:22px 24px 26px;background:#fbfaf7;flex:1}
-.result h2{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.amount{font-size:40px;font-weight:800;letter-spacing:-.02em;margin:6px 0 0;font-variant-numeric:tabular-nums}
-.amount small{font-size:16px;font-weight:600;color:var(--muted);letter-spacing:0}
-.annual{color:var(--muted);font-variant-numeric:tabular-nums}
-.verdict{display:inline-block;margin-top:12px;padding:5px 10px;border-radius:999px;font-size:13px;font-weight:700}
-.verdict.zero{background:var(--good-bg);color:var(--good)}
-.verdict.due{background:var(--due-bg);color:var(--due)}
+/* ---------- Result ---------- */
+.result{padding:18px 18px 22px;background:var(--ipg-gray);flex:1}
+.result h2{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--ipg-muted)}
+.amount{font-size:34px;font-weight:700;color:var(--ipg-navy);letter-spacing:-.02em;margin:4px 0 0;font-variant-numeric:tabular-nums}
+.amount small{font-size:13px;font-weight:400;color:var(--ipg-muted);letter-spacing:0}
+.annual{font-family:var(--mono);font-size:12px;color:var(--ipg-muted)}
+.verdict{display:inline-block;margin-top:10px;padding:3px 9px;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:500}
+.verdict.zero{background:var(--ipg-teal-light);color:var(--ipg-teal-dark)}
+.verdict.due{background:var(--ipg-navy);color:#fff}
 .verdict.pending{background:var(--warn-bg);color:var(--warn)}
-.math{margin:16px 0 0;padding:0;list-style:none;border-top:1px solid var(--line)}
-.math li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
-.math li span:last-child{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
-.math li.fail span:last-child{color:var(--good)}
-.note{font-size:12.5px;color:var(--muted);margin-top:16px}
+.math{margin:14px 0 0;padding:12px 14px;list-style:none;background:#fff;border:1.5px solid var(--ipg-border);border-radius:var(--radius)}
+.math li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--ipg-gray);font-size:12px}
+.math li:last-child{border-bottom:0}
+.math li span:last-child{font-family:var(--mono);font-weight:500;text-align:right}
+.math li.fail span:last-child{color:var(--ipg-teal)}
+.note{font-size:11.5px;color:var(--ipg-muted);margin-top:14px}
+.footnote{font-size:11px;color:var(--ipg-muted);margin-top:8px}
+.status-bar{padding:6px 18px;background:var(--ipg-gray);border-top:1px solid var(--ipg-border);font-size:10px;color:var(--ipg-muted);font-family:var(--mono)}
 
-/* Map legend + layer toggles */
-.legend{position:absolute;z-index:500;left:12px;bottom:22px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+/* ---------- Map ---------- */
+.legend{position:absolute;z-index:500;left:12px;bottom:22px;background:#fff;border:1.5px solid var(--ipg-border);border-radius:var(--radius);padding:8px 11px;font-size:11.5px;box-shadow:var(--shadow)}
 .legend label{display:flex;align-items:center;gap:8px;cursor:pointer;padding:2px 0}
-.legend input{accent-color:var(--accent);margin:0}
+.legend input{accent-color:var(--ipg-teal);margin:0}
 .sw{width:16px;height:12px;border-radius:3px;flex:none}
-.sw.seda{background:var(--seda-fill);border:1.5px solid var(--seda)}
-.sw.ward{border:1.5px solid var(--ward);background:transparent}
+.sw.seda{background:rgba(0,168,156,.3);border:1.5px solid var(--ipg-teal)}
+.sw.ward{border:1.5px solid var(--ipg-navy);background:transparent}
 .ward-num{display:flex;align-items:center;justify-content:center;pointer-events:none}
-.ward-num span{font-weight:800;font-size:12px;line-height:1;color:#2b2f36;background:rgba(255,255,255,.88);border:1px solid rgba(43,47,54,.35);border-radius:999px;padding:3px 5px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
-.z-far .ward-num span{font-size:9.5px;padding:2px 3px;min-width:15px}
-.z-near .ward-num span{font-size:14px;padding:4px 7px}
-.map-tip{position:absolute;z-index:500;top:12px;left:50%;transform:translateX(-50%);background:rgba(28,31,36,.85);color:#fff;font-size:12.5px;padding:6px 12px;border-radius:999px;pointer-events:none;white-space:nowrap}
+.ward-num span{font-family:var(--mono);font-weight:500;font-size:11px;line-height:1;color:var(--ipg-navy);background:rgba(255,255,255,.9);border:1px solid rgba(13,35,64,.3);border-radius:20px;padding:3px 5px;min-width:20px;text-align:center}
+.z-far .ward-num span{font-size:9px;padding:2px 3px;min-width:15px}
+.z-near .ward-num span{font-size:13px;padding:4px 7px}
+.map-tip{position:absolute;z-index:500;top:12px;left:50%;transform:translateX(-50%);background:rgba(13,35,64,.88);color:#fff;font-size:11px;padding:5px 12px;border-radius:20px;pointer-events:none;white-space:nowrap}
 @media (max-width:820px){.map-tip{display:none}}
 .leaflet-container{font-family:inherit}
 /* Mute the OpenStreetMap basemap so the SEDA and ward layers stand out */
@@ -114,13 +123,20 @@ header.top p{margin:8px 0 0;color:var(--muted);font-size:14px}
 </style>
 </head>
 <body>
+<div class="app-wrapper">
+<div class="header">
+  <div class="header-logo">IPG</div>
+  <div>
+    <div class="header-title">Equitable Employment Tax Calculator</div>
+    <div class="header-sub">Institute for the Public Good — Chicago</div>
+  </div>
+</div>
 <div class="app">
   <aside class="panel">
-    <header class="top">
-      <div class="eyebrow">Institute for the Public Good</div>
-      <h1>Equitable Employment Tax Calculator</h1>
+    <div class="intro">
       <p>Check whether your business is located in a Socioeconomically Disadvantaged Area (SEDA) and estimate what you would owe.</p>
-    </header>
+      <p>The Equitable Employment Tax is a proposed tax in the city of Chicago on businesses at or larger than 125 full-time employees in the city of Chicago at $25/employee/month. It exempts (credits) companies that operate in a SEDA zone.</p>
+    </div>
 
     <section class="step">
       <div class="step-head"><div class="num">1</div><h2>Business address</h2></div>
@@ -134,14 +150,24 @@ header.top p{margin:8px 0 0;color:var(--muted);font-size:14px}
 
     <section class="step">
       <div class="step-head"><div class="num">2</div><h2>Full-time equivalent employees in Chicago</h2></div>
-      <input class="field" id="fte" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 150" aria-label="Chicago FTEs" style="width:100%">
-      <p class="hint">Count full-time equivalents (FTEs) working in Chicago only. Two half-time employees count as one FTE.</p>
+      <label class="sub" for="fte">Total FTEs across all Chicago sites</label>
+      <input class="field" id="fte" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 150" style="width:100%">
+      <p class="hint">Count full-time equivalents (FTEs) working in Chicago only.</p>
+      <label class="sub" for="sedaFte" style="margin-top:14px">Of these, FTEs at sites in a SEDA zone <em>(optional)</em></label>
+      <input class="field" id="sedaFte" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Leave blank if you have one site" style="width:100%">
+      <p class="hint">For businesses with more than one Chicago site. Use the address lookup to check each site. If left blank, all FTEs are assumed to work at the address checked in step 1.</p>
     </section>
 
     <section class="step">
-      <div class="step-head"><div class="num">3</div><h2>Exempt business types</h2></div>
+      <div class="step-head"><div class="num">3</div><h2>Exemptions</h2></div>
+      <h3 class="sub">Exempt employers</h3>
       <div class="checks" id="checks"></div>
-      <p class="hint">Check any that apply. Exempt businesses owe nothing regardless of size or location.</p>
+      <p class="hint">Check any that apply. Exempt employers owe nothing regardless of size or location.</p>
+      <h3 class="sub" style="margin-top:18px">Excluded workers</h3>
+      <p class="hint" style="margin-top:0">These workers are not counted toward the threshold or taxed:</p>
+      <ul class="excl" id="excl"></ul>
+      <label class="sub" for="exclFte">FTEs in these categories <em>(if any)</em></label>
+      <input class="field" id="exclFte" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0" style="width:100%">
     </section>
 
     <section class="result" aria-live="polite">
@@ -151,17 +177,20 @@ header.top p{margin:8px 0 0;color:var(--muted);font-size:14px}
       <div class="verdict pending" id="verdict">Enter your details</div>
       <ul class="math" id="math"></ul>
       <p class="note" id="note"></p>
+      <p class="footnote" id="footnote"></p>
     </section>
+    <div class="status-bar">Boundaries: City of Chicago Data Portal · SEDA map &amp; Wards (2023–)</div>
   </aside>
 
   <div class="map-wrap">
     <div id="map" aria-label="Map of SEDA zones and Chicago wards"></div>
     <div class="map-tip">Click anywhere in Chicago to check that location</div>
     <div class="legend">
-      <label><input type="checkbox" id="tSeda" checked><span class="sw seda"></span>SEDA zone (tax = $0)</label>
+      <label><input type="checkbox" id="tSeda" checked><span class="sw seda"></span>SEDA zone</label>
       <label><input type="checkbox" id="tWard" checked><span class="sw ward"></span>Wards &amp; ward numbers</label>
     </div>
   </div>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -173,12 +202,19 @@ const POLICY = {
   ratePerEmployeePerMonth: 25,  // dollars per FTE per month
   threshold: 125,               // FTE count at which the tax applies
   thresholdInclusive: true,     // true: 125 FTEs owes the tax; false: tax starts above 125
-  // Exempt business types — each one becomes a checkbox.
+  // Exempt employers — each becomes a checkbox. Checking one makes the tax $0.
   exemptions: [
-    { id: "nonprofit",  label: "Nonprofit organization",   desc: "Exempt under Section 501(c) or 501(d) of the Internal Revenue Code" },
-    { id: "agri",       label: "Agricultural labor",       desc: "Business engaged in agricultural labor" },
-    { id: "newspaper",  label: "Newspaper distribution",   desc: "Business engaged in newspaper distribution" },
-    { id: "government", label: "Governmental institution", desc: "A unit of federal, state, or local government" },
+    { id: "nonprofit",  label: "Nonprofit organization",
+      desc: "Organized under Section 501(c), 501(d), or 401(c) of the Internal Revenue Code (as qualified by Sections 502 and 503). Does not apply if unrelated business income is normally more than 50% of total annual income." },
+    { id: "government", label: "Governmental unit",
+      desc: "Federal, state, or local government, including any political subdivision." },
+  ],
+  // Excluded workers — not counted toward the threshold or the tax.
+  excludedWorkers: [
+    { label: "Agricultural labor", desc: "As defined in Section 214 of the Illinois Unemployment Insurance Act." },
+    { label: "Domestic service", desc: "Work done solely on a daily basis in a private home." },
+    { label: "Newspaper carriers under 18", desc: "Newspaper delivery or distribution by workers under age 18." },
+    { label: "Family members", desc: "Work for one's own parent, child, or spouse." },
   ],
 };
 
@@ -232,9 +268,9 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
 }).addTo(map);
 
 const css = n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const sedaLayer = L.geoJSON(SEDA,{style:{color:css('--seda'),weight:1,fillColor:css('--seda'),fillOpacity:.32},interactive:false}).addTo(map);
+const sedaLayer = L.geoJSON(SEDA,{style:{color:css('--ipg-teal'),weight:1,fillColor:css('--ipg-teal'),fillOpacity:.28},interactive:false}).addTo(map);
 const wardLayer = L.geoJSON(WARDS,{
-  style:{color:css('--ward'),weight:1.4,fill:false,opacity:.75},interactive:false
+  style:{color:css('--ipg-navy'),weight:1.4,fill:false,opacity:.7},interactive:false
 }).addTo(map);
 
 // Ward numbers, placed at a point well inside each ward
@@ -353,34 +389,57 @@ POLICY.exemptions.forEach(x=>{
   checksEl.appendChild(lab);
 });
 checksEl.addEventListener('change',compute);
-document.getElementById('fte').addEventListener('input',compute);
+const exclEl=document.getElementById('excl');
+POLICY.excludedWorkers.forEach(x=>{
+  const li=document.createElement('li');
+  const b=document.createElement('b'); b.textContent=x.label;
+  const s=document.createElement('span'); s.textContent=x.desc;
+  li.append(b,s); exclEl.appendChild(li);
+});
+['fte','sedaFte','exclFte'].forEach(id=>document.getElementById(id).addEventListener('input',compute));
 
 const usd=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:n%1?2:0});
 
+function num(id){const v=document.getElementById(id).value;return v===''?null:Math.max(0,parseFloat(v)||0);}
+const fmt=n=>n.toLocaleString('en-US',{maximumFractionDigits:1});
+
 function compute(){
-  const fteRaw=document.getElementById('fte').value;
-  const fte=fteRaw===''?null:Math.max(0,parseFloat(fteRaw)||0);
+  const fte=num('fte'), sedaIn=num('sedaFte'), excl=num('exclFte')||0;
   const ex=[...checksEl.querySelectorAll('input:checked')].map(i=>POLICY.exemptions.find(x=>x.id===i.dataset.id).label);
   const loc=state.loc;
   const rate=POLICY.ratePerEmployeePerMonth, T=POLICY.threshold;
-  const over = fte!==null && (POLICY.thresholdInclusive ? fte>=T : fte>T);
+
+  const counted = fte===null ? null : Math.max(0, fte-excl);
+  const over = counted!==null && (POLICY.thresholdInclusive ? counted>=T : counted>T);
+  // FTEs at SEDA sites: the number entered, or (single site) all FTEs if the checked address is in a SEDA zone
+  let seda = 0, sedaAssumed = false;
+  if(counted!==null){
+    if(sedaIn!==null) seda=Math.min(sedaIn,counted);
+    else if(loc && loc.inSeda){ seda=counted; sedaAssumed=true; }
+  }
+  const taxable = counted===null ? null : Math.max(0, counted-seda);
 
   const rows=[]; let monthly=0, verdict, vclass, note='';
-  rows.push(['Exempt business type', ex.length?ex.join(', '):'None', !!ex.length]);
-  rows.push(['Location', !loc?'Not checked yet':!loc.inChicago?'Outside Chicago':loc.inSeda?`SEDA zone (Ward ${loc.ward})`:`Not in SEDA (Ward ${loc.ward})`, !!(loc&&(loc.inSeda||!loc.inChicago))]);
-  rows.push(['Chicago FTEs', fte===null?'—':fte.toLocaleString('en-US'), fte!==null && !over]);
-  rows.push([`Threshold`, `${POLICY.thresholdInclusive?'':'more than '}${T}${POLICY.thresholdInclusive?' or more':''} FTEs`, false]);
+  rows.push(['Exempt employer', ex.length?ex.join(', '):'None', !!ex.length]);
+  rows.push(['Address checked', !loc?'Not checked yet':!loc.inChicago?'Outside Chicago':loc.inSeda?`SEDA zone (Ward ${loc.ward})`:`Not in SEDA (Ward ${loc.ward})`, !!(loc&&(loc.inSeda||!loc.inChicago))]);
+  rows.push(['Chicago FTEs', fte===null?'—':fmt(fte), false]);
+  if(excl>0) rows.push(['Less excluded workers', '− '+fmt(Math.min(excl,fte||0)), false]);
+  rows.push([`FTEs counted toward ${T}-FTE threshold`, counted===null?'—':fmt(counted), counted!==null && !over]);
 
-  if(ex.length){ verdict='Exempt — business type'; vclass='zero'; }
-  else if(loc && !loc.inChicago){ verdict='Outside Chicago — not subject'; vclass='zero'; }
-  else if(loc && loc.inSeda){ verdict='Exempt — located in a SEDA zone'; vclass='zero'; }
+  if(ex.length){ verdict='Exempt employer'; vclass='zero'; }
+  else if(loc && !loc.inChicago && sedaIn===null){ verdict='Outside Chicago — not subject'; vclass='zero'; }
   else if(fte===null){ verdict='Enter your FTE count'; vclass='pending'; }
   else if(!over){ verdict=`Below the ${T}-FTE threshold`; vclass='zero'; }
   else{
-    monthly=fte*rate;
-    rows.push(['Calculation', `${fte.toLocaleString('en-US')} × ${usd(rate)}`, false]);
-    if(!loc){ verdict='Estimate — check your address'; vclass='pending'; note='This assumes the business is not in a SEDA zone. Look up the address above to confirm.'; }
-    else { verdict='Tax applies'; vclass='due'; }
+    if(seda>0) rows.push([sedaAssumed?'Less SEDA-site FTEs (all, single site)':'Less SEDA-site FTEs', '− '+fmt(seda), taxable===0]);
+    rows.push(['Taxable FTEs', fmt(taxable), false]);
+    monthly=taxable*rate;
+    if(taxable===0){ verdict='No tax — all FTEs at SEDA-zone sites'; vclass='zero'; }
+    else{
+      rows.push(['Calculation', `${fmt(taxable)} × ${usd(rate)}`, false]);
+      if(!loc && sedaIn===null){ verdict='Estimate — check your address'; vclass='pending'; note='This assumes no FTEs work at a SEDA-zone site. Look up the address above to confirm.'; }
+      else { verdict='Tax applies'; vclass='due'; }
+    }
   }
 
   document.getElementById('amount').innerHTML=`${usd(monthly)}<small> / month</small>`;
@@ -394,7 +453,9 @@ function compute(){
     li.append(a,b); m.appendChild(li);
   });
   document.getElementById('note').textContent = (note?note+' ':'') +
-    `Once a business reaches the threshold, the tax is ${usd(rate)} per FTE per month on every Chicago FTE, not just those above ${T}. This tool gives an estimate only; it is not tax advice.`;
+    `Once a business reaches the threshold, the tax is ${usd(rate)} per FTE per month on every Chicago FTE, not just those above ${T}. This tool gives an estimate only; it is not tax advice.*`;
+  document.getElementById('footnote').textContent =
+    '* If you have multiple sites, and one is located in a SEDA area, the employees allocated to that SEDA site will be counted towards the threshold, but will be removed from the tax calculation.';
 }
 compute();
 </script>
